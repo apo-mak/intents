@@ -28,10 +28,12 @@ intents:
 
       # device_class
       - sentences:
+          # Ouvre les volets dans toute la maison
+          - <ouvre> [<le>]{cover_classes:device_class} <partout>
           # Ouvre tous les volets
           - <ouvre> <tous> [<le>]{cover_classes:device_class}
-          # Ouvre les volets dans toute la maison
-          - <ouvre> [<tous>] [<le>]{cover_classes:device_class} <partout>
+          # Ouvre tous les volets dans toute la maison
+          - <ouvre> <tous> [<le>]{cover_classes:device_class} <partout>
         slots:
           domain: cover
         response: cover
@@ -48,3 +50,19 @@ intents:
           area:
             slot: true
         response: cover
+
+      # name and floor
+      - sentences:
+          # Ouvre la fenetre droite dy rez-de-chaussée
+          - <ouvre> [<le>]{name} [<dans>] [<le>]{floor}
+        requires_context:
+          domain: cover
+        response: cover
+
+      # device_class and floor
+      - sentences:
+          # Ouvre les rideaux du premier étage
+          - <ouvre> [<tous>] [<le>]{cover_classes:device_class} [<dans>] [<le>]{floor}
+        response: cover
+        slots:
+          domain: cover

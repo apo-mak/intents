@@ -529,6 +529,54 @@ tests:
         state: "off"
     response: "Ja"
 
+  - sentences:
+      - "sind alle türen zu?"
+      - "sind alle türen geschlossen?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "door"
+        state: "off"
+    response: "Nein, Küchentür ist es nicht"
+
+  - sentences:
+      - "sind alle türen geöffnet?"
+      - "stehen alle türen offen?"
+      - "sind alle türen auf?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "door"
+        state: "on"
+    response: "Nein, Wohnungstür ist es nicht"
+
+  - sentences:
+      - "sind alle türen im eingang zu?"
+      - "sind alle türen im eingang geschlossen?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "door"
+        area: "Eingang"
+        state: "off"
+    response: "Ja"
+
+  - sentences:
+      - "sind alle türen in der küche geöffnet?"
+      - "stehen alle türen in der küche offen?"
+      - "sind alle türen in der küche auf?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "door"
+        area: "Küche"
+        state: "on"
+    response: "Ja"
+
   # Garage door
   - sentences:
       - "ist das Garagentor geschlossen?"
@@ -574,6 +622,103 @@ tests:
         name: "Garagentor"
         state: "on"
     response: "Nein"
+
+  # Window
+  - sentences:
+      - "ist das Küchenfenster offen?"
+      - "steht das Küchenfenster offen?"
+      - "ist das Küchenfenster auf?"
+      - "ist das Küchenfenster geöffnet?"
+      - "ist das Küchenfenster gekippt?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        name: "Küchenfenster"
+        state: "on"
+    response: "Nein"
+
+  - sentences:
+      - "ist das Küchenfenster in der Küche offen?"
+      - "ist in der Küche das Küchenfenster offen?"
+      - "ist das Küchenfenster offen in der Küche?"
+      - "ist das Küchenfenster in der Küche gekippt?"
+      - "ist in der Küche das Küchenfenster gekippt?"
+      - "ist das Küchenfenster gekippt in der Küche?"
+      - "steht das Küchenfenster in der Küche offen?"
+      - "steht in der Küche das Küchenfenster offen?"
+      - "steht das Küchenfenster offen in der Küche?"
+    intent:
+      name: HassGetState
+      slots:
+        area: "Küche"
+        domain: "binary_sensor"
+        device_class: "window"
+        name: "Küchenfenster"
+        state: "on"
+    response: "Nein"
+
+  - sentences:
+      - "ist das Küchenfenster zu?"
+      - "steht das Küchenfenster zu?"
+      - "ist das Küchenfenster geschlossen?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        name: "Küchenfenster"
+        state: "off"
+    response: "Ja"
+
+  - sentences:
+      - "sind alle fenster zu?"
+      - "sind alle fenster geschlossen?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        state: "off"
+    response: "Nein, Wohnzimmerfenster ist es nicht"
+
+  - sentences:
+      - "sind alle fenster geöffnet?"
+      - "stehen alle fenster offen?"
+      - "sind alle fenster auf?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        state: "on"
+    response: "Nein, Küchenfenster ist es nicht"
+
+  - sentences:
+      - "sind alle fenster im wohnzimmer geöffnet?"
+      - "stehen alle fenster im wohnzimmer offen?"
+      - "sind alle fenster im wohnzimmer auf?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        area: "Wohnzimmer"
+        state: "on"
+    response: "Ja"
+
+  - sentences:
+      - "sind alle fenster im wohnzimmer zu?"
+      - "sind alle fenster im wohnzimmer geschlossen?"
+    intent:
+      name: HassGetState
+      slots:
+        domain: "binary_sensor"
+        device_class: "window"
+        area: "Wohnzimmer"
+        state: "off"
+    response: "Nein, Wohnzimmerfenster ist es nicht"
 
   # Gas
   - sentences:

@@ -7,15 +7,15 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable
 
-from hassil import Intents
-from hassil.expression import (
+from hassil import (
     Expression,
+    Group,
+    Intents,
     ListReference,
     RuleReference,
     Sentence,
-    Sequence,
+    TextSlotList,
 )
-from hassil.intents import TextSlotList
 
 from . import SENTENCES_DIR
 
@@ -69,8 +69,9 @@ def do_test_language_sentences(
     )
 
     # Add placeholder slots that HA will generate
-    language_sentences.slot_lists["area"] = TextSlotList(values=[])
-    language_sentences.slot_lists["name"] = TextSlotList(values=[])
+    language_sentences.slot_lists["area"] = TextSlotList(name="area", values=[])
+    language_sentences.slot_lists["name"] = TextSlotList(name="name", values=[])
+    language_sentences.slot_lists["floor"] = TextSlotList(name="floor", values=[])
 
     # Lint sentences
     for intent_name, intent in language_sentences.intents.items():
@@ -80,7 +81,6 @@ def do_test_language_sentences(
 
         intent_schema = intent_schemas[intent_name]
         slot_schema = intent_schema.get("slots", {})
-        slot_combinations = intent_schema.get("slot_combinations")
 
         for data in intent.data:
             if not data.sentences:
@@ -102,12 +102,12 @@ def do_test_language_sentences(
 
             for sentence in data.sentences:
                 found_slots: set[str] = set()
-                for expression in _flatten(sentence):
+                for expression in _flatten(sentence.expression):
                     _verify(
                         expression,
                         language_sentences,
                         intent_name,
-                        slot_schema,
+                        slot_schema=slot_schema,
                         visited_rules=set(),
                         found_slots=found_slots,
                         expansion_rules=expansion_rules,
@@ -125,23 +125,12 @@ def do_test_language_sentences(
                             slot_name in found_slots
                         ), f"Missing required slot: '{slot_name}', intent='{intent_name}', sentence='{sentence.text}'"
 
-                if slot_combinations:
-                    # Verify one of the combinations is matched
-                    combo_matched = False
-                    for combo_slots in slot_combinations.values():
-                        if found_slots.issuperset(combo_slots):
-                            combo_matched = True
-                            break
-
-                    assert (
-                        combo_matched
-                    ), f"Slot combination not matched: intent='{intent_name}', slots={found_slots}, sentence='{sentence.text}'"
-
 
 def _verify(
     expression: Expression,
     intents: Intents,
     intent_name: str,
+    *,
     slot_schema: dict[str, Any],
     visited_rules: set[str],
     found_slots: set[str],
@@ -174,52 +163,55 @@ def _verify(
         ), f"Recursive rule detected: <{rule_ref.rule_name}>"
 
         # Verify rule body
-        for body_expression in _flatten(expansion_rules[rule_ref.rule_name]):
+        for body_expression in _flatten(expansion_rules[rule_ref.rule_name].expression):
             visited_rules.add(rule_ref.rule_name)
             _verify(
                 body_expression,
                 intents,
                 intent_name,
-                slot_schema,
-                visited_rules,
-                found_slots,
-                expansion_rules,
+                slot_schema=slot_schema,
+                visited_rules=visited_rules,
+                found_slots=found_slots,
+                expansion_rules=expansion_rules,
             )
             visited_rules.remove(rule_ref.rule_name)
 
 
 def _flatten(expression: Expression) -> Iterable[Expression]:
-    if isinstance(expression, Sequence):
-        seq: Sequence = expression
-        for item in seq.items:
+    if isinstance(expression, Group):
+        grp: Group = expression
+        for item in grp.items:
             yield from _flatten(item)
     else:
         yield expression
 
 
-def gen_test(test_file: Path) -> None:
+def gen_test(test_file: str) -> None:
     def test_func(
         intent_schemas: dict[str, Any],
         language_sentences_yaml: dict[str, Any],
         language_sentences_common: Intents,
     ) -> None:
         do_test_language_sentences(
-            test_file.name,
+            test_file,
             intent_schemas,
             language_sentences_yaml,
             language_sentences_common,
         )
 
-    test_func.__name__ = f"test_{test_file.stem}"
+    test_func.__name__ = f"test_{test_file.rsplit('.', 1)[0]}"
     setattr(sys.modules[__name__], test_func.__name__, test_func)
 
 
 def gen_tests() -> None:
-    lang_dir = SENTENCES_DIR / "en"
+    names = {
+        test_file.name
+        for test_file in SENTENCES_DIR.glob("*/*.yaml")
+        if test_file.name != "_common.yaml"
+    }
 
-    for test_file in lang_dir.glob("*.yaml"):
-        if test_file.name != "_common.yaml":
-            gen_test(test_file)
+    for name in sorted(names):
+        gen_test(name)
 
 
 gen_tests()

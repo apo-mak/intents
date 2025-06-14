@@ -1,22 +1,35 @@
 language: nb
+floors:
+  - name: "Første etasje"
+    id: first_floor_id
+  - name: "Andre etasje"
+    id: second_floor_id
+  - name: "Kjeller"
+    id: basement_id
 areas:
   - name: Kjøkken
     id: kitchen
+    floor: first_floor_id
 
   - name: Stue
     id: living_room
+    floor: first_floor_id
 
   - name: Soverom
     id: bedroom
+    floor: second_floor_id
 
   - name: Garasje
     id: garage
+    floor: basement_id
 
   - name: Bad
     id: bathroom
+    floor: second_floor_id
 
   - name: Inngang
     id: entrance
+    floor: first_floor_id
 
 entities:
   - name: Soveromlampe
@@ -391,3 +404,41 @@ entities:
     attributes:
       temperature: "-2"
       temperature_unit: "°C"
+
+  - name: "Dusty"
+    id: "vacuum.dusty"
+    state: "idle"
+
+  - name: "TV"
+    id: "media_player.tv"
+    state: "idle"
+    attributes:
+      volume_level: "50"
+
+  - name: "Hovedkrana"
+    id: "valve.hovedkrana"
+    state: "open"
+    attributes:
+      position: "100"
+
+timers:
+  - is_active: false
+    start_hours: 1
+    total_seconds_left: 100
+    rounded_hours_left: 0
+    rounded_minutes_left: 1
+    rounded_seconds_left: 40
+
+  - name: "pizza"
+    start_minutes: 30
+    total_seconds_left: 1505
+    rounded_hours_left: 0
+    rounded_minutes_left: 25
+    rounded_seconds_left: 0
+
+  - area: "kitchen"
+    start_minutes: 5
+    total_seconds_left: 190
+    rounded_hours_left: 0
+    rounded_minutes_left: 3
+    rounded_seconds_left: 0

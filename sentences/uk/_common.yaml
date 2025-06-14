@@ -7,24 +7,32 @@ responses:
 
     # Errors for when user is not logged in
     no_area: "Вибачте, мені не відоме приміщення з назвою {{ area }}"
+    no_floor: "Вибачте, мені не відомий поверх з назвою {{ area }}"
     no_domain: "Вибачте, мені не відомо жодного {{ domain }}"
     no_domain_in_area: "Вибачте, мені не відомо жодного {{ domain }} в приміщенні {{ area }}"
+    no_domain_in_floor: "Вибачте, мені не відомо жодного {{ domain }} на {{ floor }} поверсі"
     no_device_class: "Вибачте, мені не відомо жодного {{ device_class }}"
     no_device_class_in_area: "Вибачте, мені не відомо жодного {{ device_class }} в приміщенні {{ area }}"
+    no_device_class_in_floor: "Вибачте, мені не відомо жодного {{ device_class }} на {{ floor }} поверсі"
     no_entity: "Вибачте, мені не відомо пристрою з назвою {{ entity }}"
     no_entity_in_area: "Вибачте, мені не відомо пристрою з назвою {{ entity }} в приміщенні {{ area }}"
+    no_entity_in_floor: "Вибачте, мені не відомо пристрою з назвою {{ entity }} на {{ floor }} поверсі"
 
     # Errors for when user is logged in and we can give more information
     no_entity_exposed: "Вибачте, {{ entity }} не є доступним"
     no_entity_in_area_exposed: "Вибачте, {{ entity }} в приміщенні {{ area }} не є доступним"
+    no_entity_in_floor_exposed: "Вибачте, {{ entity }} на {{ floor }} поверсі не є доступним"
     no_domain_exposed: "Вибачте, немає жодного доступного {{ domain }}"
     no_domain_in_area_exposed: "Вибачте, немає жодного доступного {{ domain }} в приміщенні {{ area }}"
+    no_domain_in_floor_exposed: "Вибачте, немає жодного доступного {{ domain }} на {{ floor }} поверсі"
     no_device_class_exposed: "Вибачте, немає жодного доступного {{ device_class }}"
     no_device_class_in_area_exposed: "Вибачте, немає жодного доступного {{ device_class }} в приміщенні {{ area }}"
+    no_device_class_in_floor_exposed: "Вибачте, немає жодного доступного {{ device_class }} на {{ floor }} поверсі"
 
     # Used when multiple (exposed) devices have the same name
     duplicate_entities: "Вибачте, є декілька пристроїв з назвою {{ entity }}"
     duplicate_entities_in_area: "Вибачте, є декілька пристроїв з назвою {{ entity }} в приміщенні {{ area }}"
+    duplicate_entities_in_floor: "Вибачте, є декілька пристроїв з назвою {{ entity }} на {{ floor }} поверсі"
 lists:
   color:
     values:
@@ -60,12 +68,6 @@ lists:
       type: "temperature"
       from: 0
       to: 100
-  temperature_unit:
-    values:
-      - in: "c | цельсію | за цельсієм"
-        out: "celsius"
-      - in: "f | фаренгейту | за фаренгейтом"
-        out: "fahrenheit"
   brightness_level:
     values:
       - in: "максим(альна|ий) | максимум | [як] найяскравіше | [дуже|над] яскрав(о|ий)"
@@ -324,16 +326,79 @@ lists:
   shopping_list_item:
     wildcard: true
 
+  position:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  volume:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  timer_seconds:
+    range:
+      from: 1
+      to: 100
+  timer_minutes:
+    range:
+      from: 1
+      to: 100
+  timer_hours:
+    range:
+      from: 1
+      to: 100
+  timer_half:
+    values:
+      - in: "пів"
+        out: 30
+      - in: "1/2"
+        out: 30
+      - in: "половиною"
+        out: 30
+  timer_one_and_half:
+    values:
+      - in: "півтори"
+        out: 90
+  timer_name:
+    wildcard: true
+  timer_command:
+    wildcard: true
+  message:
+    wildcard: true
+
 expansion_rules:
   name: "{name}"
   area: "[в|у|на] {area}"
+  floor: "[в|у|на] {floor}"
   ввімкни: "(в|у)вімкни | включи"
   вимкни: "вимкни | виключи"
   зміни: "зміни | встанови | зроби"
   brightness: "{brightness}[%| відсотк(ів|а|и)]"
-  temperature: "{temperature} [градус(ів|и|а)] [{temperature_unit}]"
+  temperature: "{temperature} [градус(ів|и|а)]"
+  position: "{position}[[ ]%| відсотк(ів|а|и)]"
+  volume: "{volume:volume_level}[[ ]%| відсотк(ів|а|и)]"
+
+  # Locks & covers
   відкрий: "відкрий | розкрий | підніми | відчини"
   закрий: "закрий | опусти | зачини"
+
+  # Timers
+  timer_set: "(запусти|встанови|ввімкни|розпочни|створи)"
+  timer_cancel: "(скасуй|вимкни|зупини)"
+
+  timer_duration_seconds: "{timer_seconds:seconds} секунд[у|и]"
+  timer_duration_minutes: "({timer_minutes:minutes} хвилин[у|и][ [і |та ]{timer_seconds:seconds} секунд[у|и]])|({timer_minutes:minutes} з {timer_half:seconds} хвилин[у|и])|({timer_half:seconds} хвилини)|({timer_one_and_half:seconds} хвилини)"
+  timer_duration_hours: "({timer_hours:hours} годин[у|и] [[і |та ]{timer_minutes:minutes} хвилин[у|и]][ [і |та ]{timer_seconds:seconds} секунд[у|и]])|({timer_hours:hours} з {timer_half:minutes} години)|({timer_half:minutes} години)|({timer_one_and_half:minutes} години)"
+  timer_duration: "<timer_duration_seconds>|<timer_duration_minutes>|<timer_duration_hours>"
+
+  timer_start_seconds: "{timer_seconds:start_seconds} секунд[а|и]"
+  timer_start_minutes: "{timer_minutes:start_minutes} хвилин[а|и][ [і |та ]{timer_seconds:start_seconds} секунд[а|и]]"
+  timer_start_hours: "{timer_hours:start_hours} годин[а|и][ [і |та ]{timer_minutes:start_minutes} хвилин[а|и]][ [і |та ]{timer_seconds:start_seconds} секунд[а|и]]"
+  timer_start: "<timer_start_seconds>|<timer_start_minutes>|<timer_start_hours>"
+
 skip_words:
   - "будь ласка"
   - "зараз"

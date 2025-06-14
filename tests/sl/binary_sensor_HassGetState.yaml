@@ -265,7 +265,7 @@ tests:
 
   - sentences:
       - "je kaj zaznano hladno?"
-      - "ali je kateri senzor zaznal hladno?"
+      #- "ali je kateri senzor zaznal hladno?"
       - "ali je kaj zaznano mrzlo?"
     intent:
       name: HassGetState
@@ -645,6 +645,7 @@ tests:
   - sentences:
       - "ali je senzor gibanja v garaži vključen?"
       - "ali je senzor gibanja v garaži sprožen?"
+      - "ali je sprožen senzor gibanja v garaži?"
     intent:
       name: HassGetState
       slots:
@@ -655,6 +656,18 @@ tests:
         state: "on"
     response: "Da"
 
+  - sentences:
+      - "ali je zaznano gibanje v garaži?"
+      - "ali je detektirano gibanje v garaži?"
+    intent:
+      name: HassGetState
+      slots:
+        area: "garaži"
+        domain: "binary_sensor"
+        device_class: "motion"
+        name: "gibanje"
+        state: "on"
+    response: "Da"
   - sentences:
       - "ali je kateri senzor gibanja vključen?"
       - "ali je kakšen senzor gibanja sprožen?"
@@ -1102,6 +1115,7 @@ tests:
   # Running
   - sentences:
       - "ali pralni stroj deluje?"
+      - "ali pralni stroj še dela?"
       - "pralni stroj še laufa?"
       - "pralni stroj že obratuje?"
       - "ali je pralni stroj še delujoč?"

@@ -21,10 +21,18 @@ responses:
     no_domain_in_area_exposed: "Pahoittelut, yhtäkään {{ domain }} alueella {{ area }} ei ole asetettu näkyviin"
     no_device_class_exposed: "Pahoittelut, yhtäkään {{ device_class }} ei ole asetettu näkyviin"
     no_device_class_in_area_exposed: "Pahoittelut, yhtäkään {{ device_class }} alueella {{ area }} ei ole asetettu näkyviin"
+    no_entity_in_floor_exposed: "Pahoittelut, {{ entity }} ei ole asetettu näkyviin kerroksessa {{ floor }}"
+    no_domain_in_floor_exposed: "Pahoittelut, yhtäkään {{ domain }} ei ole asetettu näkyviin kerroksessa {{ floor }}"
+    no_device_class_in_floor_exposed: "Pahoittelut, yhtäkään {{ device_class }} ei ole asetettu näkyviin kerroksessa {{ floor }}"
 
     # Used when multiple (exposed) devices have the same name
-    duplicate_entities: "Pahoittelut, useita laitteita nimeltä {{ entity }} löytyi"
-    duplicate_entities_in_area: "Pahoittelut, useita laitteita nimeltä {{ entity }} löytyi alueelta {{ area }}"
+    duplicate_entities: "Pahoittelut, useita laitteita nimellä {{ entity }} löytyi"
+    duplicate_entities_in_area: "Pahoittelut, useita laitteita nimellä {{ entity }} löytyi alueelta {{ area }}"
+
+    # Errors for timers
+    timer_not_found: "Pahoittelut, en löydä tätä ajastinta"
+    multiple_timers_matched: "Pahoittelut, en voi käskyttää useampaa ajastinta"
+    no_timer_support: "Pahoittelut, ajastimia ei tueta tällä laitteella"
 
 lists:
   color:
@@ -57,19 +65,11 @@ lists:
       type: "temperature"
       from: 0
       to: 100
-  temperature_unit:
-    values:
-      - "celsius"
-      - in: "c"
-        out: "celsius"
-      - "fahrenheit"
-      - in: "f"
-        out: "fahrenheit"
   brightness_level:
     values:
-      - in: "(max|maksimi|maksimiin|maksimi tasolle|korkein|korkeimmalle tasolle)"
+      - in: "(max|maksimi|maksimiin|maksimi tasolle|maksimitasolle|korkein|korkeimmalle tasolle|täysille|täysillä)"
         out: 100
-      - in: "(min|minimi|minimiin|alin|matalin|matalimmalle tasolle)"
+      - in: "(min|minimi|minimiin|minimille|minimitasolle|alin|matalin|matalimmalle tasolle)"
         out: 1
   on_off_states:
     values:
@@ -125,6 +125,83 @@ lists:
         out: "unlocked"
   shopping_list_item:
     wildcard: true
+
+  message:
+    wildcard: true
+
+  position:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  volume:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  timer_seconds:
+    range:
+      from: 1
+      to: 100
+  timer_minutes:
+    range:
+      from: 1
+      to: 100
+  timer_hours:
+    range:
+      from: 1
+      to: 100
+  timer_half:
+    values:
+      - in: "(puoli|puoleksi|puolen|puolen tunnin|puolella tunnilla)"
+        out: 30
+      - in: "1/2"
+        out: 30
+  timer_quarter:
+    values:
+      - in: "(vartin|varttitunnin|vartiksi|varttitunniksi|vartilla|varttitunnilla)"
+        out: "15"
+  timer_three_quarter:
+    values:
+      - in: "(3 vartin|3 vartiksi|3 vartilla)"
+        out: "45"
+  timer_one_hour:
+    values:
+      - in: "(tunnin|tunti|tunniksi|tunnilla)"
+        out: "1"
+  timer_name:
+    wildcard: true
+  timer_command:
+    wildcard: true
+
+  default_areas:
+    values:
+      - in: "(yläkerrassa|yläkerrasta|yläkerran|yläkertaan)"
+        out: "Yläkerta"
+      - in: "(alakerrassa|alakerrasta|alakerran|alakertaan)"
+        out: "Alakerta"
+      - in: "(eteisessä|eteisestä|eteisen|eteiseen)"
+        out: "Eteinen"
+      - in: "(ullakolla|ullakolta|ullakon|ullakolle)"
+        out: "Ullakko"
+      - in: "(parvekkeella|parvekkeelta|parvekkeen|parvekkeelle)"
+        out: "Parveke"
+      - in: "(parvella|parvelta|parven|parvelle)"
+        out: "Parvi"
+      - in: "(verannalla|verannalta|verannan|verannalle)"
+        out: "Veranta"
+      - in: "(portaikossa|portaikosta|portaikon|portaikkoon|portaikolta|portaikoille)"
+        out: "Portaikko"
+      - in: "(vintillä|vintiltä|vintille|vintin)"
+        out: "Vintti"
+      - in: "(nurkkauksessa|nurkkauksesta|nurkkaukselle|nurkkauksen)"
+        out: "Nurkkaus"
+      - in: "(mökissä|mökistä|mökkiin|mökille|mökiltä|mökin)"
+        out: "Mökki"
+# saving for future regex possibilities tekninen tila, -allas, -koppi, -tupa, -katos, -mökki, nurkkaus
+
 expansion_rules:
   # On off states
   päälle: "päälle" # on
@@ -147,24 +224,34 @@ expansion_rules:
   # Actions / Verbs
   kerro: "(kerro|näytä|sano)" # tell|show|say
   kytke: "(kytke|laita|aseta)" # toggle|put|set
-  käynnistä: "(käynnistä|starttaa)" # run|start
+  käynnistä: "(käynnistä|starttaa|aja)" # run|start
   pysäytä: "(pysäytä|sammuta|stoppaa)" # stop|turn off|stop
+
   avaa: "(avaa|aukaise|nosta)" # open|open|raise
   sulje: "(sulje|laske)" # close|lower
-  laita: "(kytke|aseta|käännä|säädä|pistä|muuta|laita)" # toggle|set|turn|adjust|put|change (for brightness)
+  laita: "(kytke|aseta|käännä|säädä|saada|pistä|muuta|laita)" # toggle|set|turn|adjust|put|change (for brightness, volume and covers, "säädä" is recognized as "saada" in STT)
+
+  # Position - covers and valves
+  asento: "{position}[[ ]%| prosenttia]"
+  a_prosentti: "{volume:volume_level}[[ ]%| prosentti]"
+  a_prosenttiin: "{volume:volume_level}[[ ]%| prosenttiin]"
+  a_prosenttia: "{volume:volume_level}[[ ]%| prosenttia]"
+  a_prosentiksi: "{volume:volume_level}[[ ]%| prosentiksi]"
+  a_prosentille: "{volume:volume_level}[[ ]%| prosentille]"
 
   kuinka: "(kuinka|miten|millainen|minkälainen)" # how..
   onko: "(onko|onhan|onkohan|oliko)" # are singular
   ovatko: "(ovatko|olivatko)" # are plural
-  paljonko: "(paljonko|mikä|<kuinka> paljon)" # how much|what
+  paljonko: "(paljonko|mikä|(kuinka|miten) paljon)" # how much|what
   montako: "(montako|moniko|kuinka moni|kuinka monet|kuinka monta|miten moni|miten monta)" # how many
   nyt: "(nyt|juuri nyt|just nyt|tällä hetkellä)" # Now
 
   lämpötila: "(lämpötila|lämpö|sisälämpötila|ulkolämpötila|asteet)" # temperature|warmth|indoor temperature|outdoo temperature|degrees
   # lämpötilaltaan: "(lämpötilaltaan|lämmöltään|sisälämpötilaltaan|ulkolämpötilaltaan|asteiltaan)"
-  asteeseen: "{temperature}[ ]([°|asteeseen|astetta][ ][{temperature_unit}]|{temperature_unit}[ ][°|asteeseen|astetta])"
+  asteeseen: "{temperature}[ ]([°|asteeseen|astetta])"
 
   # Brightness percentage singular forms
+  k_prosentti_taivutus: "<k_prosentti>|<k_prosenttia>|<k_prosentiksi>|<k_prosenttiin>|<k_prosentille>"
   k_prosentti: "{brightness}[ ][%|prosentti]" # nominatiivi = mikä, kuka
   # k_prosentin: "{brightness}[ ]prosentin" # genetiivi = minkä, kenen
   k_prosenttia: "{brightness}[ ]prosenttia" # partitiivi = mitä, ketä
@@ -192,6 +279,7 @@ expansion_rules:
   # k_prosenteitta: "{brightness}[ ]prosenteitta" # monikon abessiivi
 
   # Brightness, singular forms
+  kirkkaus_taivutus: "(<kirkkaus>|<kirkkaudeksi>|<kirkkauteen>|<kirkkaudelle>)"
   kirkkaus: "(kirkkaus|valoteho|loiste|intensiteetti)"
   # kirkkauden: "(kirkkauden|valotehon|loisteen|intensiteetin)"
   # kirkkautta: "(kirkkautta|valotehoa|loistetta|intensiteettiä)"
@@ -219,6 +307,7 @@ expansion_rules:
   # kirkkauksitta: "(kirkkauksitta|valotehoitta|loisteitta|intensiteeteittä)"
 
   # Color, singular forms
+  väri_taivutus: "(<väri>|<väriksi>|<väriin>|<värille>|<värit>|<väreiksi>|<väreihin>|<väreille>|<väriltään>)"
   väri: "(väri|[väri]sävy|värivivahde)"
   # värin: "(värin|[väri]sävyn|värivivahteen)"
   # väriä: "(väriä|[väri]sävyä|värivivahdetta)"
@@ -232,7 +321,7 @@ expansion_rules:
   värille: "(värille|[väri]sävylle|värivivahteelle)"
   # värittä: "(värittä|[väri]sävyttä|värivivahteetta)"
   # Color, plural forms
-  värit: "(värit|[väri]sävyt|värivivahdteet)"
+  värit: "(värit|[väri]sävyt|värivivahteet)"
   # värien: "(värien|[väri]sävyjen|värivivahteiden)"
   # värejä: "(värejä|[väri]sävyjä|värivivahteita)"
   # väreinä: "(väreinä|[väri]sävyinä|värivivahteina)"
@@ -244,8 +333,10 @@ expansion_rules:
   # väreiltä: "(väreiltä|[väri]sävyiltä|värivivahteilta)"
   väreille: "(väreille|[väri]sävyille|värivivahteille)"
   # väreittä: "(väreittä|[väri]sävyittä|värivivahteitta)"
+  väriltään: "(väriltään|väreiltään)"
 
-  huone: "{area}" # Room, this Finnish version helps when reading sentences
+  huone: "({default_areas:area}|{area})" # Room, this Finnish version helps when reading sentences
+
   paikka: "(kaupunki|kaupungissa|paikka|paikassa|kaupungin|paikan)"
   nimi: "{name}"
 
@@ -254,6 +345,7 @@ expansion_rules:
   kaikki: "(kaikki|jokainen|jokikinen)" # all
 
   # Device prefix to avoid congjugating devices if possible, singular form
+  laite_taivutus: "<laite>|<laitteen>|<laitteessa>|<laitteesta>|<laitteeseen>|<laitteelta>|<laitteelle>"
   laite: "[äly]laite"
   laitteen: "[äly]laitteen"
   # laitetta: "[äly]laitetta"
@@ -282,6 +374,7 @@ expansion_rules:
 
   # Area prefix to avoid congjugating areas if possible
   alue: "(alue|paikka|huone|tila)" # nominatiivi = mikä, kuka
+  alue_taivutus: "(<alue>|<alueen>|<alueessa>|<alueesta>|<alueeseen>|<alueella>|<alueelta>|<alueelle>)"
   alueen: "(alueen|paikan|huoneen|tilan)" # genetiivi = minkä, kenen
   # aluetta: "(aluetta|paikkaa|huonetta|tilaa)" # partitiivi = mitä, ketä
   # alueena: "(alueena|paikkana|huoneena|tilana)" # essiivi = minä, kenä
@@ -293,6 +386,7 @@ expansion_rules:
   alueelta: "(alueelta|paikalta|huoneelta|tilalta)" # ablatiivi = miltä, keneltä
   alueelle: "(alueelle|paikalle|huoneelle|tilalle)" # allatiivi = mille, kenelle
   # alueetta: "(alueetta|paikatta|huoneetta|tilatta)" # abessiivi = ilman mitä, ketä
+  alue_pääte: "({default_areas:area}|{area}[e][ssa|ssä|sta|stä|än|in|an|on|ön|seen|ltä|llä|lla|lta|lle|n])"
   # aluein: "(aluein|paikoin|huonein|tiloin)" # instruktiivi = miten
   # alueineen: "(alueineen|paikkoineen|huoneineen|tiloineen)" # komitatiivi = minkä, kenen kanssa
 
@@ -327,6 +421,19 @@ expansion_rules:
   # kylmättä: "(kylmättä|viileättä|vilpoisetta)" # abessiivi = ilman mitä, ketä
   # kylmine: "(kylmine|viileine|vilpoisine)" # instruktiivi = miten
   # kylmineen: "(kylmineen|viileineen|vilpoisineen)" # komitatiivi = minkä, kenen kanssa
+
+  # Timers
+  timer_set: "(aloita|luo|käynnistä|aseta|laita)"
+  timer_cancel: "(peruuta|poista|lopeta)"
+  timer_duration_seconds: "{timer_seconds:seconds} (sekunti[a]|sekunnilla|sekunniksi|sekunnille|sekunnin)"
+  timer_duration_minutes: "{timer_three_quarter:minutes}|{timer_quarter:minutes}|({timer_minutes:minutes} (minuutti[a]|minuutilla|minuutiksi|minuutille|minuutin)[ [ja ]{timer_seconds:seconds} (sekunti[a]|sekunnilla|sekunniksi|sekunnille|sekunnin)])|({timer_minutes:minutes} ja {timer_half:seconds} (minuutti[a]|minuutilla|minuutiksi|minuutille|minuutin))|({timer_half:seconds} (minuutti[a]|minuutilla|minuutiksi|minuutille|minuutin))"
+  timer_duration_hours: "{timer_one_hour:hours}|({timer_hours:hours} (tunti[a]|tunnilla|tunniksi|tunnille|tunnin)[ [ja ]{timer_minutes:minutes} (minuutti[a]|minuutilla|minuutiksi|minuutille|minuutin)][ [ja ]{timer_seconds:seconds} (sekunti[a]|sekunnilla|sekunniksi|sekunnille|sekunnin)])|({timer_hours:hours} ja {timer_half:minutes} (tunti[a]|tunnilla|tunniksi|tunnille|tunnin))|({timer_half:minutes} (tunti[a]|tunnilla|tunniksi|tunnille|tunnin))"
+  timer_duration: "<timer_duration_seconds>|<timer_duration_minutes>|<timer_duration_hours>|{timer_hours:hours}.{timer_minutes:minutes}"
+
+  timer_start_seconds: "{timer_seconds:start_seconds} (sekunti[a]|sekunnin|sekunnille)"
+  timer_start_minutes: "{timer_minutes:start_minutes} (minuutti[a]|minuutin|minuutille)[ [ja ]{timer_seconds:start_seconds} (sekunti[a]|sekunnin|sekunnille)]"
+  timer_start_hours: "{timer_three_quarter:start_minutes}|{timer_quarter:start_minutes}|{timer_one_hour:start_hours}|{timer_hours:start_hours} (tunti[a]|tunnin|tunnille)[ [ja ]{timer_minutes:start_minutes} (minuutti[a]|minuutin|minuutille)][ [ja ]{timer_seconds:start_seconds} (sekunti[a]|sekunnin|sekunnille)]"
+  timer_start: "<timer_start_seconds>|<timer_start_minutes>|<timer_start_hours>|{timer_hours:start_hours}.{timer_minutes:start_minutes}"
 
 skip_words:
   - "voitko" # Can you
